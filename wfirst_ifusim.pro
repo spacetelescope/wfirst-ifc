@@ -250,7 +250,7 @@ inpcube[Xgrid/2,Ygrid/2,*]=1.
 ; Read in spectrum from a file
 spectype=yanny_par(hdr,'spectype')
 specfile=yanny_par(hdr,'spectrum')
-if (spectype eq 'fits2') then begin
+if (spectype eq 'fits') then begin
   inp=readfits(concat_dir(getenv('WFIRST_DIR'),specfile))
   inpwave=inp[0,*]
   inpflux=inp[1,*]

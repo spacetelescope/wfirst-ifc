@@ -12,7 +12,7 @@ wavesol RefFiles/wavelengths.txt
 
 # Spectrum
 #spectrum RefFiles/blackbody_21mag.fits
-#spectype fits2
+#spectype fits
 spectrum RefFiles/SN_template_z=0.50_ph=0.0_mdl=hsiao_type=Ia.txt
 spectype txt
 
@@ -42,5 +42,5 @@ typedef struct {
 } IFUPARS;
 
 # 0.0 , 0.07 is centered in pixels and slices
-IFUPARS 500. 0. 0.07
-#IFUPARS 900. 0.04 0.07
+IFUPARS 900. 0. 0.07
+IFUPARS 900. 0.04 0.0
