@@ -1,0 +1,46 @@
+ifutype slicer
+
+# Input cube 
+
+# Slice parameters in arcsec
+slicewidth 0.15
+slicelength 3.0
+nslices 21
+
+# Wavelength solution
+wavesol RefFiles/wavelengths.txt
+
+# Spectrum
+#spectrum RefFiles/blackbody_21mag.fits
+#spectype fits2
+spectrum RefFiles/SN_template_z=0.50_ph=0.0_mdl=hsiao_type=Ia.txt
+spectype txt
+
+# Effective area
+effarea RefFiles/IFU_effective_area_150518.txt
+# Telescope diameter in cm
+teldiam 236.
+
+# Detector is H2RG (HgCdTe)
+# Actually 0.075, but 0.08 makes simulations easier
+# since we're using a 0.01 grid size
+det_pixscale 0.08
+# Dark current e-/s/pixel
+det_dkcurr 0.01
+# CDS readnoise e- rms
+det_rn 4
+
+# Aperture extraction effective radii
+nreff 2.5
+
+# Exposure time in seconds, dithers in arcsec
+# xdither is along slice, ydither across slice
+typedef struct {
+ float exptime;
+ float xdither;
+ float ydither;
+} IFUPARS;
+
+# 0.0 , 0.07 is centered in pixels and slices
+IFUPARS 500. 0. 0.07
+#IFUPARS 900. 0.04 0.07
