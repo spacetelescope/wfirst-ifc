@@ -184,7 +184,7 @@ pro wfirst_ifusim,run=run
 if (keyword_set(run)) then outdir=strcompress('out/'+run+'/',/remove_all) $
 else outdir='out/'
 
-spawn,strcompress('mkdir '+outdir)
+spawn,strcompress('mkdir -p '+outdir)
 
 ; Read in parameters
 exposures=yanny_readone(concat_dir(getenv('WFIRST_DIR'),'ifupars.par'),'IFUPARS',hdr=hdr)
