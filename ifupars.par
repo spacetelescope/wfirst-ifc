@@ -11,27 +11,37 @@ nslices 21
 wavesol RefFiles/wavelengths.txt
 
 # Spectrum
-#spectrum RefFiles/blackbody_21mag.fits
-#spectype fits
-spectrum RefFiles/SN_template_z=0.50_ph=0.0_mdl=hsiao_type=Ia.txt
-spectype txt
+spectrum RefFiles/blackbody_19mag.fits
+spectype fits
+#spectrum RefFiles/SN_template_z=0.50_ph=0.0_mdl=hsiao_type=Ia.txt
+#spectype txt
 
 # Effective area
-effarea RefFiles/IFU_effective_area_150518.txt
+effarea RefFiles/IFU_effective_area_151029.txt
 # Telescope diameter in cm
 teldiam 236.
 
+# Thermal background model file
+thermalfile RefFiles/thermal.fits
+
 # Detector is H2RG (HgCdTe)
-# Actually 0.075, but 0.08 makes simulations easier
-# since we're using a 0.01 grid size
-det_pixscale 0.08
+det_pixscale 0.075
 # Dark current e-/s/pixel
 det_dkcurr 0.01
 # CDS readnoise e- rms
 det_rn 4
 
+# PSF reference file
+psfcube RefFiles/psfcube.fits.gz
+psfwave RefFiles/psfwave.fits
+
 # Aperture extraction effective radii
-nreff 2.5
+# (negative means fixed radius in arcsec)
+nreff -0.3
+
+# Number of realizations to constrain covariance
+# 2 is pretty good, 4 very good, 10 overkill
+ncovar 10
 
 # Exposure time in seconds, dithers in arcsec
 # xdither is along slice, ydither across slice
@@ -41,6 +51,6 @@ typedef struct {
  float ydither;
 } IFUPARS;
 
-# 0.0 , 0.07 is centered in pixels and slices
-IFUPARS 900. 0. 0.07
-IFUPARS 900. 0.04 0.0
+# 0.03 , 0.07 is centered in pixels and slices
+IFUPARS 500. 0.03 0.07
+#IFUPARS 900. 0.04 0.0
