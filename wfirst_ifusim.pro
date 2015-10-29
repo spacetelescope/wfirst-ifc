@@ -527,13 +527,13 @@ for i=0,nwave-1 do begin
   ; Noise+science cubes
   for j=0,ncovar-1 do begin
     theseflux=flux[*,i,j]
-    thisimg=ml_griddata(thesex,thesey,theseflux,[XOsize,YOsize],rlim,rscale,scale=scalefac,ivar=theseivar,invarimg=invarimg,/noflag)
+    thisimg=ml_griddataWF(thesex,thesey,theseflux,[XOsize,YOsize],rlim,rscale,scale=scalefac,ivar=theseivar,invarimg=invarimg,/noflag)
     reccube[*,*,i,j]=thisimg
     if (j eq 0) then recivar[*,*,i]=invarimg
   endfor
 
   ; Infinite SNR truth cube
-  thisimg1=ml_griddata(thesex,thesey,theseflux1,[XOsize,YOsize],rlim,rscale,scale=scalefac,/noflag)
+  thisimg1=ml_griddataWF(thesex,thesey,theseflux1,[XOsize,YOsize],rlim,rscale,scale=scalefac,/noflag)
   reccube1[*,*,i]=thisimg1
 endfor
 writefits,concat_dir(outdir,'reccube.fits'),reccube
