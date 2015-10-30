@@ -52,5 +52,5 @@ typedef struct {
 } IFUPARS;
 
 # 0.03 , 0.07 is centered in pixels and slices
-IFUPARS 900. 0.03 0.07
+IFUPARS 500. 0.03 0.07
 #IFUPARS 900. 0.04 0.0
