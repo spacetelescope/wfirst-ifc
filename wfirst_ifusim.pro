@@ -1,5 +1,7 @@
 ; v5 (July 23 2015)
 
+forward_function ml_griddatawf, x, y, f, dim_out, rlim, sigma, scale=scale, ivar=ivar, invarimg=invarimg, maskvec=maskvec, maskimg=maskimg,noflag=noflag
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ; Resample psf cube to match to our wavelength sampling

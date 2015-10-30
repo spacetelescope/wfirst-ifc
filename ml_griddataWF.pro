@@ -87,7 +87,7 @@
 ;       major speedup (R. D'Souza, D. Law)
 ;-
 
-function ml_griddataWF, x, y, f, dim_out, rlim, sigma, scale=scale, ivar=ivar, invarimg=invarimg, maskvec=maskvec, maskimg=maskimg,noflag=noflag
+function ml_griddatawf, x, y, f, dim_out, rlim, sigma, scale=scale, ivar=ivar, invarimg=invarimg, maskvec=maskvec, maskimg=maskimg,noflag=noflag
 
 ; Dimensions
 ntot = n_elements(f) ; Number of total samples
