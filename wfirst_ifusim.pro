@@ -595,8 +595,7 @@ for j=0,ncovar-1 do begin
   ; Average ratio of realrms/finalrms is the covariance correction factor
   rmsratio[*,j]=realrms[*,j]/idealrms
 endfor
-allratio=total(rmsratio,2)/float(ncovar)
-covarfac=(moment(allratio[boxsize:nwave-boxsize-1]))[0]
+covarfac=median(rmsratio[boxsize:nwave-boxsize-1,*])
 ; Apply to derived SNR
 snr=snr/covarfac
 
@@ -604,6 +603,7 @@ snr=snr/covarfac
 ; Write some intermediary files
 counts_spec=finalspec1/(1./exposures[0].exptime/tput_all/(A/energy*dwave)*1e17)
 counts_noise=idealrms/(1./exposures[0].exptime/tput_all/(A/energy*dwave)*1e17)*covarfac
+writefits,concat_dir(outdir,'rmsratio.fits'),rmsratio
 writefits,concat_dir(outdir,'counts_spec.fits'),counts_spec
 writefits,concat_dir(outdir,'counts_noise.fits'),counts_noise
 
@@ -635,7 +635,7 @@ plot,wave,snr,xtitle='Wavelength (microns)',ytitle='SNR',title='Supernova z=0.5,
     !y=origy
 set_plot,'x'
 
-openw,lun, concat_dir(outdir,'results.txt'), /get_lun, width=250
+openw,lun, concat_dir(outdir,strcompress('results_'+run+'.txt',/remove_all)), /get_lun, width=250
 printf,lun,'# wave aperture counts noise snr'
 for i=0,nwave-1 do $
   printf,lun,wave[i]*1e4,aperrad[i]*outppixsize,counts_spec[i],counts_noise[i],snr[i]
