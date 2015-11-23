@@ -8,18 +8,20 @@ slicelength 3.0
 nslices 21
 
 # Wavelength solution
-wavesol RefFiles/wavelengths.txt
+wavesol RefFiles/waifs_prism_disp.fits
 
 # Spectrum
-spectrum RefFiles/blackbody_19mag.fits
-spectype fits
-#spectrum RefFiles/SN_template_z=0.50_ph=0.0_mdl=hsiao_type=Ia.txt
-#spectype txt
+spectrum RefFiles/waifs_blackbody19.fits
+#spectrum RefFiles/waifs_sn1a_z0.5.fits
 
-# Effective area
-effarea RefFiles/IFU_effective_area_151029.txt
-# Telescope diameter in cm
+# Throughput
+tputfile RefFiles/waifs_throughput.fits
+# Telescope diameter and unobscured area in cm and cm2
 teldiam 236.
+telarea 33680.
+
+# Zodiacal light model
+zodifile RefFiles/waifs_zodi_medium.fits
 
 # Thermal background model file
 thermalfile RefFiles/thermal.fits

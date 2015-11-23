@@ -225,8 +225,8 @@ radpas=4.8481e-6; Radians per arcsecond
 c=2.9979e10; Speed of light (cm/s)
 hc=1.986e-16; Planck constant times speed of light (erg cm)
 k=1.381e-16; Boltzmann constant (erg/K)
-teldiam=float(yanny_par(hdr,'teldiam'))
-A=!PI*teldiam*teldiam/4.; Area of primary (cm^2)
+teldiam=float(yanny_par(hdr,'teldiam')); Telescope diameter (cm)
+A=float(yanny_par(hdr,'telarea')); Unobscured area of primary (cm^2)
 
 ; Type of IFU (currently only 'slicer')
 ifutype=strtrim(yanny_par(hdr,'ifutype'),2)
@@ -255,16 +255,12 @@ XgridAS=XfovAS+1.
 YgridAS=YfovAS+1.
 
 ; Read in wavelength solution in microns
-wavefile=yanny_par(hdr,'wavesol')
-data=read_ascii(concat_dir(getenv('WFIRST_DIR'),wavefile))
-data1=data.field1
-wave=data1[1,*]/1e4
+wavefile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'wavesol'))
+data=mrdfits(wavefile,1)
+wave=data.wavelength
 nwave=n_elements(wave)
-; Define dlam which is width of each channel in Angstroms
-dwave=fltarr(nwave)
-dwave[0]=(wave[1]-wave[0])*1e4
-for i=1,nwave-1 do dwave[i]=(wave[i]-wave[i-1])*1e4
-
+; Define dwave which is width of each channel in Angstroms
+dwave=data.dlds*1e4
 
 ; Input image is a star (blackbody) on a 0.015 arcsec grid
 inppixsize=0.015; arcsec (use this because it means the pixel scales
@@ -275,21 +271,14 @@ inpcube=fltarr(fix(Xgrid),fix(Ygrid),nwave)
 inpcube[Xgrid/2,Ygrid/2,*]=1.
 
 ; Read in spectrum from a file
-spectype=yanny_par(hdr,'spectype')
-specfile=yanny_par(hdr,'spectrum')
-if (spectype eq 'fits') then begin
-  inp=readfits(concat_dir(getenv('WFIRST_DIR'),specfile))
-  inpwave=inp[0,*]
-  inpflux=inp[1,*]
-  fluxnew=interpol(inpflux,inpwave,wave)
-endif
-if (spectype eq 'txt') then begin
-  inp=read_ascii(concat_dir(getenv('WFIRST_DIR'),specfile))
-  data1=inp.field1
-  inpwave=data1[0,*]/1e4
-  inpflux=data1[1,*]
-  fluxnew=interpol(inpflux,inpwave,wave)
-endif
+specfile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'spectrum'))
+inp=mrdfits(specfile,1)
+inpwave=inp.wavelength
+inpflux=inp.flux
+; Interpolate to desired wavelength solution
+fluxmjy=interpol(inpflux,inpwave,wave)
+; Convert from mJy (1e-26 erg/s/cm2/Hz) to erg/s/cm2/Ang
+fluxnew=fluxmjy*1e-26/1e8/(wave*1e-4)/(wave*1e-4)*c
 ; Stick it into the cube
 for i=0,nwave-1 do $
   inpcube[*,*,i]=inpcube[*,*,i]*fluxnew[i]
@@ -382,7 +371,8 @@ for p=0,nexp-1 do begin
 endfor
 
 ; Define zodiacal light
-zodi=mrdfits(concat_dir(getenv('WFIRST_DIR'),'RefFiles/zodi_medium.fits'),1)
+zodifile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'zodifile'))
+zodi=mrdfits(zodifile,1)
 ; Wavelength in microns
 zodi_wave=zodi.wavelength
 ; Surface brightness in MJy/sr
@@ -402,7 +392,8 @@ zodi_flux=interpol(zodi_sb,zodi_wave,wave)
 zodi_flux=zodi_flux/energy*dwave
 
 ; Thermal background
-thermal=mrdfits(concat_dir(getenv('WFIRST_DIR'),'RefFiles/thermal.fits'),0)
+thermalfile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'thermalfile'))
+thermal=mrdfits(thermalfile,0)
 thermal_w=thermal[0,*]; Wave in Angstroms
 thermal_f=thermal[1,*]; erg/s/cm2/Ang/arcsec^2
 ; Resample onto wavelength grid
@@ -413,15 +404,15 @@ thermal_flux=thermal_flux*slicewidth*det_pixscale*A
 ; width of each spectral element to photon/s/channel
 thermal_flux=thermal_flux/energy*dwave
 
-; Define effective area in cm2: Area multiplied by throughput
-eafile=yanny_par(hdr,'effarea')
-data=read_ascii(concat_dir(getenv('WFIRST_DIR'),eafile),data_start=3)
-data1=data.field1
-ea_wave=data1[0,*]/1e4
-ea_val=data1[1,*]
-; Interpolate to effective area in cm2
-effarea=interpol(ea_val,ea_wave,wave)*1e4
-tput_all=effarea/A
+; Define effective area in cm2 and throughput
+tputfile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'tputfile'))
+data=mrdfits(tputfile,1)
+tput_wave=data.wavelength
+tput_val=data.throughput
+; Interpolate to final wavelength solution
+tput_all=interpol(tput_val,tput_wave,wave)
+; Effective area in cm2
+effarea=tput_all*A
 
 ; Get sliced spectra and add noise sources
 print,'Making ',nspec*nexp,' spectra'
