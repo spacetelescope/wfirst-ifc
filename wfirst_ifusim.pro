@@ -393,11 +393,13 @@ zodi_flux=zodi_flux/energy*dwave
 
 ; Thermal background
 thermalfile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'thermalfile'))
-thermal=mrdfits(thermalfile,0)
-thermal_w=thermal[0,*]; Wave in Angstroms
-thermal_f=thermal[1,*]; erg/s/cm2/Ang/arcsec^2
+thermal=mrdfits(thermalfile,1)
+thermal_w=thermal.wavelength; Wavelength in microns
+thermal_f=thermal.sb; Surface brightness in MJy/sr
 ; Resample onto wavelength grid
-thermal_flux=interpol(thermal_f,thermal_w/1e4,wave)
+thermal_flux=interpol(thermal_f,thermal_w,wave)
+; Convert to erg/s/cm2/Ang/arcsec^2
+thermal_flux=thermal_flux*(1e-17)*2.3504*1e-11
 ; Convert to erg/s/Ang/spaxel
 thermal_flux=thermal_flux*slicewidth*det_pixscale*A
 ; Energy to photon conversion and integrate over

@@ -24,7 +24,7 @@ telarea 33680.
 zodifile RefFiles/waifs_zodi_medium.fits
 
 # Thermal background model file
-thermalfile RefFiles/thermal.fits
+thermalfile RefFiles/waifs_thermal.fits
 
 # Detector is H2RG (HgCdTe)
 det_pixscale 0.075
