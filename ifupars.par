@@ -1,5 +1,8 @@
 ifutype slicer
 
+# RNG seed (<0 means use systime)
+rngseed 11.
+
 # Input cube 
 
 # Slice parameters in arcsec

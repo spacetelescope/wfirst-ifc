@@ -228,6 +228,10 @@ k=1.381e-16; Boltzmann constant (erg/K)
 teldiam=float(yanny_par(hdr,'teldiam')); Telescope diameter (cm)
 A=float(yanny_par(hdr,'telarea')); Unobscured area of primary (cm^2)
 
+; Seed for RNG
+rngseed=float(yanny_par(hdr,'rngseed'))
+if (rngseed lt 0) then rngseed=long(systime(/seconds))
+
 ; Type of IFU (currently only 'slicer')
 ifutype=strtrim(yanny_par(hdr,'ifutype'),2)
 
@@ -381,30 +385,31 @@ zodi_sb=zodi.sb
 zodi_sb=zodi_sb*(1e-17)*2.3504*1e-11
 ; Convert to on-sky spatial element
 ; erg/s/Hz/spaxel seen by telescope
-zodi_sb=zodi_sb*slicewidth*det_pixscale*A; Inconsistency on telescope area, but
-; it doesn't matter cuz we'll divide it out again immediately later.
+zodi_sb=zodi_sb*slicewidth*det_pixscale*A
 ; Convert to erg/s/Angstrom/spaxel
 zodi_sb=zodi_sb*c/(zodi_wave*1e-4)/(zodi_wave*1e-4)*1e-8
 ; Resample onto wavelength grid
-zodi_flux=interpol(zodi_sb,zodi_wave,wave)
+zodi_sb=interpol(zodi_sb,zodi_wave,wave)
 ; Energy to photon conversion and integrate over
 ; width of each spectral element to photon/s/channel
-zodi_flux=zodi_flux/energy*dwave
+zodi_flux=zodi_sb/energy*dwave
 
 ; Thermal background
 thermalfile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'thermalfile'))
 thermal=mrdfits(thermalfile,1)
 thermal_w=thermal.wavelength; Wavelength in microns
-thermal_f=thermal.sb; Surface brightness in MJy/sr
+thermal_sb=thermal.sb; Surface brightness in MJy/sr
 ; Resample onto wavelength grid
-thermal_flux=interpol(thermal_f,thermal_w,wave)
+thermal_sb=interpol(thermal_sb,thermal_w,wave)
 ; Convert to erg/s/cm2/Ang/arcsec^2
-thermal_flux=thermal_flux*(1e-17)*2.3504*1e-11
+thermal_sb=thermal_sb*(1e-17)*2.3504*1e-11
+; Convert to erg/s/Hz/spaxel seen by the telescope
+thermal_sb=thermal_sb*slicewidth*det_pixscale*A
 ; Convert to erg/s/Ang/spaxel
-thermal_flux=thermal_flux*slicewidth*det_pixscale*A
+thermal_sb=thermal_sb*c/(wave*1e-4)/(wave*1e-4)*1e-8
 ; Energy to photon conversion and integrate over
 ; width of each spectral element to photon/s/channel
-thermal_flux=thermal_flux/energy*dwave
+thermal_flux=thermal_sb/energy*dwave
 
 ; Define effective area in cm2 and throughput
 tputfile=concat_dir(getenv('WFIRST_DIR'),yanny_par(hdr,'tputfile'))
@@ -430,7 +435,7 @@ for p=0,nexp-1 do begin
   ; Background spectrum in counts/channel
   ; from zodiacal and dark current
   bgspec=(zodi_flux*tput_all + thermal_flux*tput_all + det_dkcurr)*exposures[p].exptime
-  ;bgspec=(zodi_flux*tput_all + det_dkcurr)*exposures[p].exptime
+
   for q=0,nspec-1 do begin
     ; Where does this spatial element cover?
     index=where(specmask eq q,nindex)
@@ -444,7 +449,7 @@ for p=0,nexp-1 do begin
     ; Noise vector based on total signal plus readnoise
     noisevec=sqrt(bgspec+scispec+det_rn*det_rn)
     ; Random realization of resulting noise spectrum
-    thisspec=randomn(systime_seed,nwave,ncovar)
+    thisspec=randomn(rngseed,nwave,ncovar)
     ; Add in science spectrum
     for i=0,ncovar-1 do thisspec[*,i]=thisspec[*,i]*noisevec+scispec
 
@@ -452,6 +457,7 @@ for p=0,nexp-1 do begin
     for i=0,ncovar-1 do $
       flux[q+p*nspec,*,i]=thisspec[*,i]/exposures[p].exptime/tput_all/(A/energy*dwave)*1e17
     flux1[q+p*nspec,*]=scispec/exposures[p].exptime/tput_all/(A/energy*dwave)*1e17
+
     temp=noisevec/exposures[p].exptime/tput_all/(A/energy*dwave)*1e17
     ivar[q+p*nspec,*]=1.D/(temp*temp)
   endfor
@@ -539,6 +545,7 @@ finalspec1=fltarr(nwave)
 idealrms=fltarr(nwave)
 aperrad=fltarr(nwave)
 measfwhm=fltarr(nwave)
+
 print,'Extracting spectra'
 ; Define aperture for spectral extraction
 nreff=float(yanny_par(hdr,'nreff'))
