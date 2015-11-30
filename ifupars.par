@@ -1,7 +1,7 @@
 ifutype slicer
 
 # RNG seed (<0 means use systime)
-rngseed 11.
+rngseed 30.
 
 # Input cube 
 
@@ -46,7 +46,7 @@ nreff -0.3
 
 # Number of realizations to constrain covariance
 # 2 gives ~ 2.5%, 5 gives ~ 1.5%, 13 gives ~ 1%
-ncovar 15
+ncovar 45
 
 # Exposure time in seconds, dithers in arcsec
 # xdither is along slice, ydither across slice
