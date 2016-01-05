@@ -15,7 +15,7 @@ wavesol RefFiles/waifs_prism_disp.fits
 
 # Spectrum
 #spectrum RefFiles/waifs_blackbody19.fits
-spectrum RefFiles/waifs_sn1a_z1.5.fits
+spectrum RefFiles/waifs_sn1a_z0.5.fits
 
 # Throughput
 tputfile RefFiles/waifs_throughput.fits
@@ -58,5 +58,5 @@ typedef struct {
 
 # 0.03 , 0.07 is centered in pixels and slices
 # -0.02, 0.01 is miscentered
-#IFUPARS 900. 0.03 0.07
-IFUPARS 500. -0.02 0.01
+IFUPARS 900. 0.03 0.07
+IFUPARS 900. -0.02 0.01

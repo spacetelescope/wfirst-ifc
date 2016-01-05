@@ -435,11 +435,12 @@ for p=0,nexp-1 do begin
   ; Background spectrum in counts/channel
   ; from zodiacal and dark current
   bgspec=(zodi_flux*tput_all + thermal_flux*tput_all + det_dkcurr)*exposures[p].exptime
+  thismask=specmask[*,*,p]
 
   for q=0,nspec-1 do begin
     ; Where does this spatial element cover?
-    index=where(specmask eq q,nindex)
-    xyindex=array_indices(specmask,index)
+    index=where(thismask eq q,nindex)
+    xyindex=array_indices(thismask,index)
     temp=fltarr(nindex,nwave)
     ; Sum fluxes in this footprint
     for i=0,nindex-1 do temp[i,*]=obscube[xyindex[0,i],xyindex[1,i],*]
