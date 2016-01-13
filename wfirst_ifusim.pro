@@ -246,6 +246,23 @@ det_dkcurr=float(yanny_par(hdr,'det_dkcurr'))
 det_rn=float(yanny_par(hdr,'det_rn'))
 ifu_trans=float(yanny_par(hdr,'ifu_trans'))
 
+; Sampling and readout times
+; WFIRST and NIRSPEC setup MULTI-22x4
+mframe=fix(yanny_par(hdr,'mframe'))
+tframe=float(yanny_par(hdr,'tframe'))
+; Group time 
+tgroup=mframe*tframe
+; Number of groups per exposure
+ngroup=intarr(nexp)
+for i=0,nexp-1 do begin
+  ngroup[i]=floor(exposures[i].exptime/tgroup + 1)
+  ; Modify exposure times to be integer # of groups
+  exposures[i].exptime=(ngroup[i]-1)*tgroup
+  ; Log results
+  print,strcompress('Exposure '+string(i)+': ngroup '+string(ngroup[i])+ ' texp '+string(exposures[i].exptime))
+endfor
+
+
 ; Slice setup
 det_pixscale=float(yanny_par(hdr,'det_pixscale'))
 slicewidth=float(yanny_par(hdr,'slicewidth'))
@@ -432,9 +449,9 @@ ivar=fltarr(nspec*nexp,nwave); Ivar of the simulated spectra
 flux1=fltarr(nspec*nexp,nwave); The truth spectrum (no noise)
 
 for p=0,nexp-1 do begin
-  ; Background spectrum in counts/channel
+  ; Background spectrum in counts/s/channel
   ; from zodiacal and dark current
-  bgspec=(zodi_flux*tput_all + thermal_flux*tput_all + det_dkcurr)*exposures[p].exptime
+  bgspec=zodi_flux*tput_all + thermal_flux*tput_all + det_dkcurr
   thismask=specmask[*,*,p]
 
   for q=0,nspec-1 do begin
@@ -444,11 +461,18 @@ for p=0,nexp-1 do begin
     temp=fltarr(nindex,nwave)
     ; Sum fluxes in this footprint
     for i=0,nindex-1 do temp[i,*]=obscube[xyindex[0,i],xyindex[1,i],*]
-    ; Science spectrum in counts/channel
-    scispec=total(temp,1)*exposures[p].exptime*tput_all
+    ; Science spectrum in counts/s/channel
+    scispec=total(temp,1)*tput_all
 
-    ; Noise vector based on total signal plus readnoise
-    noisevec=sqrt(bgspec+scispec+det_rn*det_rn)
+    ; New noise model that treats IR detectors properly
+    term1=12.*(ngroup[p]-1)/(mframe*ngroup[p]*(ngroup[p]+1))*det_rn*det_rn
+    term2=6.*(ngroup[p]*ngroup[p]+1)/(5*ngroup[p]*(ngroup[p]+1))*(ngroup[p]-1)*tgroup*(bgspec+scispec)
+    term3=2.*(2*mframe-1)*(ngroup[p]-1)*(mframe-1)/(mframe*ngroup[p]*(ngroup[p]+1))*tframe*(bgspec+scispec)
+    noisevec=sqrt(term1+term2-term3)
+;   noisevec=sqrt((bgspec+scispec)*exposures[p].exptime+16.)
+
+    scispec=scispec*exposures[p].exptime
+
     ; Random realization of resulting noise spectrum
     thisspec=randomn(rngseed,nwave,ncovar)
     ; Add in science spectrum
