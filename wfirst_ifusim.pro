@@ -465,9 +465,10 @@ for p=0,nexp-1 do begin
     scispec=total(temp,1)*tput_all
 
     ; New noise model that treats IR detectors properly
+    ; Use 2010 Erratum to Rausch+07
     term1=12.*(ngroup[p]-1)/(mframe*ngroup[p]*(ngroup[p]+1))*det_rn*det_rn
     term2=6.*(ngroup[p]*ngroup[p]+1)/(5*ngroup[p]*(ngroup[p]+1))*(ngroup[p]-1)*tgroup*(bgspec+scispec)
-    term3=2.*(2*mframe-1)*(ngroup[p]-1)*(mframe-1)/(mframe*ngroup[p]*(ngroup[p]+1))*tframe*(bgspec+scispec)
+    term3=2.*(mframe*mframe-1)*(ngroup[p]-1)/(mframe*ngroup[p]*(ngroup[p]+1))*tframe*(bgspec+scispec)
     noisevec=sqrt(term1+term2-term3)
 ;   noisevec=sqrt((bgspec+scispec)*exposures[p].exptime+16.)
 
