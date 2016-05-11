@@ -50,8 +50,8 @@ psfwave RefFiles/psfwave.fits
 nreff -0.3
 
 # Number of realizations to constrain covariance
-# 2 gives ~ 2.5%, 5 gives ~ 1.5%, 13 gives ~ 1%
-ncovar 45
+# 2 gives ~ 2.5%, 5 gives ~ 1.5%, 13 gives ~ 1%, 45 best
+ncovar 1
 
 # Exposure time in seconds, dithers in arcsec
 # xdither is along slice, ydither across slice
@@ -64,5 +64,7 @@ typedef struct {
 # 0.03 , 0.07 is centered in pixels and slices
 # -0.02, 0.01 is miscentered
 # Exposure times are approximate
-IFUPARS 500. 0.03 0.07
-#IFUPARS 900. -0.02 0.01
+IFUPARS 900. 0.03 0.07
+IFUPARS 900. -0.02 0.01
+#IFUPARS 900. 0.03 0.071
+#IFUPARS 900. -0.02 0.011
